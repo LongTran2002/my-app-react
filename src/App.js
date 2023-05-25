@@ -5,13 +5,17 @@ import Container from 'react-bootstrap/Container';
 import ModalAddNew from './components/ModalAddNew';
 import { ToastContainer} from 'react-toastify';
 import { useState } from 'react';
+
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
+  const [keyWord, setKeyWord] = useState("")
   const [ isShowModalAddNew, setIsShowModalAddNew] = useState(false);
   const handleClose = (e) => {
     setIsShowModalAddNew(false);
   }
+  
+
   return (
     <div className="app-container">
       <div>
