@@ -9,6 +9,8 @@ import ModalConfirm from './ModalConfirm';
 import _, { set } from "lodash";
 import { CSVLink, CSVDownload } from "react-csv";
 import "./TableUser.sass"
+import Papa from "papaparse"
+import { toast } from 'react-toastify';
 const TableUsers = () => {
     const listUsers = useStoreUser(store => store.listUsers);
     const setListUsers = useStoreUser(store => store.setListUsers);
@@ -19,6 +21,7 @@ const TableUsers = () => {
     const [isShowModaDeleteUser, setIsShowModaDeleteUser] = useState(false);
     const [sortBy, setSortBy] = useState("asc");
     const [sortField, setSortField] = useState("id")
+    const [dataExport, setDataExport] = useState([])
     const handleClose = (e) => {
         setIsShowModaEditUser(false);
         setIsShowModaDeleteUser(false);
@@ -68,12 +71,44 @@ const TableUsers = () => {
             getUsers(1)
         }
       }
-      const csvData = [
-        ["firstname", "lastname", "email"],
-        ["Ahmed", "Tomi", "ah@smthing.co.com"],
-        ["Raed", "Labes", "rl@smthing.co.com"],
-        ["Yezzi", "Min l3b", "ymin@cocococo.com"]
-      ];
+  
+      const getUsersExport = (event, done) => {
+        let result = []
+        if (listUsers && listUsers.length > 0){
+            result.push(["id","email","First name","Last name"])
+            listUsers.map(item => {
+                let arr =[]
+                arr[0] = item.id;
+                arr[1] = item.email;
+                arr[2] = item.first_name;
+                arr[3] = item.last_name;
+                result.push(arr);
+            })
+        }
+        setDataExport(result)
+        done()
+      }
+
+      const handleImportCSV =(e) => {
+        if (e.target  && e.target.files && e.target.files[0]){
+            let file = e.target.files[0];
+            if (file.type !== "text/csv") {
+                toast.error(`Only CSV files are supported`)
+                return;
+            }
+        }
+        Papa.parse(file, {
+            complete: function (result) {
+                let rawCSV = result.data;
+                if (rawCSV.length > 0) {
+
+                }
+                else{
+                    toast.error(`Not found data on csv file`)
+                }
+            }
+        })
+      }
     return (
         <>
             <div className='col-6 my-3'>
@@ -85,13 +120,15 @@ const TableUsers = () => {
                     onChange={(e)=>handleSearch(e)}>
                     </input>
                     <label htmlFor='test' className='btn btn-warning'>Import</label>
-                    <input id="test" type='file' hidden></input>
+                    <input id="test" type='file' hidden onChange={(e)=> handleImportCSV(e)}></input>
                     
                     <CSVLink 
-                        data={csvData}
+                        data={dataExport}
                         className='btn btn-primary'
                         target='_blank'
                         filename={"users.csv"}
+                        asyncOnClick={true}
+                        onClick={(event, done) => getUsersExport(event, done)}
                     >Export</CSVLink>;
                 </div>
             </div>
