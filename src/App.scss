@@ -20,4 +20,46 @@ code {
     align-items: center;
 
   }
+  .login-container{
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
+  .title{
+    text-align: center;
+    font-size: 23px;
+    font-weight: 600;
+    padding-top: 30px;
+  }
+  input {
+    padding: 5px;
+    outline: none;
+    margin-bottom: 7px;
+    width: 100%;
+    &:hover {
+      background-color: #dedede;
+      border: 1px solid #dedede;
+    }
+  }
+
+  .input-2{
+    position: relative;
+    i {
+      cursor: pointer;
+      position: absolute;
+      top: 12xpx;
+      right: 10px;
+    }
+  }
+  button {
+    padding: 10px;
+    border-radius: 3px;
+    margin-top: 15px;
+  }
+
+  .active {
+    background-color: #fe2c55;
+    color: white; 
+  }
+
 }

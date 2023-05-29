@@ -11,6 +11,9 @@ import { CSVLink, CSVDownload } from "react-csv";
 import "./TableUser.sass"
 import Papa from "papaparse"
 import { toast } from 'react-toastify';
+import { read, utils, writeFile } from 'xlsx';
+import Container from 'react-bootstrap/Container';
+import ModalAddNew from "./ModalAddNew"
 const TableUsers = () => {
     const listUsers = useStoreUser(store => store.listUsers);
     const setListUsers = useStoreUser(store => store.setListUsers);
@@ -22,9 +25,11 @@ const TableUsers = () => {
     const [sortBy, setSortBy] = useState("asc");
     const [sortField, setSortField] = useState("id")
     const [dataExport, setDataExport] = useState([])
+    const [ isShowModalAddNew, setIsShowModalAddNew] = useState(false);
     const handleClose = (e) => {
         setIsShowModaEditUser(false);
         setIsShowModaDeleteUser(false);
+        setIsShowModalAddNew(false);
       }
     const handleClickEditUser =(user) => {
         setIsShowModaEditUser(true)
@@ -89,28 +94,37 @@ const TableUsers = () => {
         done()
       }
 
-      const handleImportCSV =(e) => {
-        if (e.target  && e.target.files && e.target.files[0]){
-            let file = e.target.files[0];
-            if (file.type !== "text/csv") {
-                toast.error(`Only CSV files are supported`)
-                return;
-            }
-        }
-        Papa.parse(file, {
-            complete: function (result) {
-                let rawCSV = result.data;
-                if (rawCSV.length > 0) {
+      const handleImport = ($event) => {
+        const files = $event.target.files;
+        if (files.length) {
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const wb = read(event.target.result);
+                const sheets = wb.SheetNames;
 
-                }
-                else{
-                    toast.error(`Not found data on csv file`)
+                if (sheets.length) {
+                    const rows = utils.sheet_to_json(wb.Sheets[sheets[0]]);
+                    console.log(wb.Sheets[sheets[0]]);
+                    setListUsers(rows)
                 }
             }
-        })
+            reader.readAsArrayBuffer(file);
+        }
       }
     return (
         <>
+
+                <div className="my-3 add-new">
+                    <span>List User</span>
+                    <button className="btn btn-success" 
+                    onClick={()=>setIsShowModalAddNew(true)}
+                    >Add new users</button>
+                </div>
+            <ModalAddNew
+            show={isShowModalAddNew}
+            handleClose={handleClose}
+          />
             <div className='col-6 my-3'>
                 <div className='interact-table'>
                     <input 
@@ -119,8 +133,9 @@ const TableUsers = () => {
                     // value={keyWord}
                     onChange={(e)=>handleSearch(e)}>
                     </input>
-                    <label htmlFor='test' className='btn btn-warning'>Import</label>
-                    <input id="test" type='file' hidden onChange={(e)=> handleImportCSV(e)}></input>
+                    <input type="file" name="file" className="custom-file-input" id="inputGroupFile" required onChange={handleImport}
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" hidden/>
+                    <label className="custom-file-label btn btn-warning" htmlFor="inputGroupFile">Import</label>
                     
                     <CSVLink 
                         data={dataExport}
@@ -204,6 +219,7 @@ const TableUsers = () => {
                 show={isShowModaDeleteUser}
                 handleClose={handleClose}
             />
+
         </>
     );
 }

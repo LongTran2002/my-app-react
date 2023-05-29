@@ -9,6 +9,7 @@ const instance = axios.create({
     // Do something with response data
     return response.data ? response.data : { statusCode: response.status };
   }, function (error) {
+    console.log(error.message);
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
     return Promise.reject(error);
