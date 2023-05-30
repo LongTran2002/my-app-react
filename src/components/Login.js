@@ -4,21 +4,25 @@ import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
 import { redirect } from "react-router-dom";
+import { useContext } from "react"
+import { UserContext } from "../context/UserContext"
+import { Link } from "react-router-dom"
 const Login = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [isShowPassword, setIsShowPassword] = useState(false)
+    const { loginContext } = useContext(UserContext)
+    
+    // useEffect(()=> {
+    //     let token = localStorage.getItem("token")
+    //     console.log(token);
+    //     if (token){
+    //     navigate("/");
+    //     console.log("REnder");
 
-    useEffect(()=> {
-        let token = localStorage.getItem("token")
-        console.log(token);
-        if (token){
-        navigate("/");
-        console.log("REnder");
-
-        }
+    //     }
         
-    },[])
+    // },[])
     const navigate = useNavigate();
 
     const handleLogin = async() => {
@@ -28,9 +32,12 @@ const Login = () => {
         }
         let res = await loginApi("eve.holt@reqres.in", password);
         if (res && res.token) {
-            localStorage.setItem("token", res.token)
+            loginContext(email, res.token)
+            navigate("/");
         }
-        navigate("/");
+    }
+    const handleGoBack = () => {
+        
     }
     return(
         <>
@@ -55,8 +62,12 @@ const Login = () => {
                         disabled={email && password ? false : true}
                         onClick={()=>handleLogin()}
                 >Login</button>
-                <div>
-                    Go back
+                <div className="back">
+                    <i className="fa-solid fa-angles-left"></i>
+                    <Link to="/" relative="path">
+                        <span onClick={()=> handleGoBack()}></span>
+                    Back
+                    </Link>
                 </div>
             </div>
 
